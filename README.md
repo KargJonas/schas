@@ -6,14 +6,17 @@
 
 ### Set up Discord API access
 
-- Create a Discord bot [here](https://discord.com/developers/applications)
-  - Choose a name (this is only shown in your Discord API dashboard)
-  - Go to the `Bot` section
-  - Choose a username. This will be visible in Discord
-  - Toggle "message content intent to true"
-  - Save changes
-  - Click "Reset Token" below "username", to get your API access token.
-    You'll need to put this into the .env file - see below
+- Open Discord app overview [here](https://discord.com/developers/applications)
+- Click on `New Application`
+- Choose application name
+- Go to `General Information` section
+- Choose a name for your bot (this is only shown in your Discord API dashboard)
+- Go to the `Bot` section
+- Choose a username. This will be visible in Discord
+- Toggle `MESSAGE CONTENT INTENT` to true
+- Save changes
+- Click "Reset Token" below "username", to get your API access token.
+  You'll need to put this into the .env file - see below
 
 ### Create `.env` file
 
@@ -34,9 +37,25 @@ The `.env` is excluded by the `.gitignore` rules, which makes it a lot more diff
 python3 bot.py
 ```
 
+In the log, you should be able to find a `Bot invite link` that you can click to add the bot to your server.
+
+```
+$ python3 bot.py 
+2025-01-03 23:03:00 INFO     discord.client logging in using static token
+Loaded extension 'calendar'
+Logged in as S.C.H.A.S.
+discord.py API version: 2.4.0
+Python version: 3.10.12
+Running on: Linux 6.8.0-49-generic (posix)
+Bot invite link: https://discord.com/oauth2/authorize?client_id=1324822783283608180&scope=bot+applications.commands&permissions=3072
+-------------------
+```
+
 ### Add new functionality
 
 New features should be added as "cogs" inside the `/cogs` directory.
 You can do this by simply creating a new file inside of that dir.
 You can also have a look at `/cogs/calendar` as a reference.
 Cogs are similar to plugins. All files inside `/cogs` will be loaded automatically, so you don't need to register your cog anywhere.
+
+Have a look at `/database/models.py`. This file contains the DB schema.
