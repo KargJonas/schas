@@ -1,6 +1,15 @@
 {
   "prefix": "!",
-  
+
+  "links": {
+    "kusss_cal_page": "https://kusss.jku.at/kusss/ical-multi-form-sz.action"
+  },
+
+  "limits": {
+    "user_timeout_duration": 120,
+    "max_cal_size_bytes": 524288
+  },
+
   "logging": {
     "file": "bot.log",
     "name": "schas"
