@@ -6,21 +6,30 @@ import icalendar
 
 class IcalStudentCalendar:
     def __init__(self, ical_content):
-        self.events = self.extractEvents(ical_content)
+        self.tests = []
+        self.events = {}
+        self.extractEvents(ical_content)
 
     def getEventsForDay(self, date: datetime):
         if date.date() not in self.events:
             return []
         return sorted(self.events[date.date()], key=lambda event: event.startTime)
 
-    @staticmethod
-    def extractEvents(content) -> Dict[datetime, List]:
+    def getNextTests(self, date: datetime):
+        return sorted([test for test in self.tests if test.startTime >= date], key=lambda event: event.startTime)
+
+    def extractEvents(self, content):
         cal = icalendar.Calendar.from_ical(content)
         events: Dict[datetime, List] = {event.start.date(): [] for event in cal.walk("VEVENT")}
+        tests = []
         for event in cal.walk("VEVENT"):
             startDay: datetime = event.start.date()
-            events[startDay].append(Event(event))
-        return events
+            eventObj = Event(event)
+            events[startDay].append(eventObj)
+            if eventObj.isTest:
+                tests.append(eventObj)
+        self.events = events
+        self.tests = tests
 
 
 class Event:

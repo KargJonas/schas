@@ -115,7 +115,7 @@ class Calendar(commands.Cog):
         except discord.Forbidden:
             await ctx.send("I couldn't send you a DM.\nPlease check your privacy settings and try again.")
 
-    def getCalendarInfo(self, authorId):
+    async def getCalendarInfo(self, authorId):
         session = self.bot.database.get_session()
         content = None
         try:
@@ -126,7 +126,7 @@ class Calendar(commands.Cog):
                 content = user.calendar_cache
                 if user.cached_at < datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
                         hours=hoursToCache) or user.calendar_cache is None:
-                    content = self.fetch_and_validate_calendar(user.calendar_link)
+                    content = await self.fetch_and_validate_calendar(user.calendar_link)
                     if content is not None:
                         user.calendar_cache = content
                         user.cached_at = datetime.now(timezone.utc)
@@ -136,18 +136,17 @@ class Calendar(commands.Cog):
                         hours=hoursToCacheError):
                         raise CalendarInvalid()
                     content = user.calendar_cache
-                    session.commit()
 
         finally:
             session.close()
         return IcalStudentCalendar(content)
 
-    @commands.command(name="getRoomsForToday", description="Set your KUSSS calendar link")
+    @commands.command(name="getRoomsForToday", description="Get Rooms for today")
     async def getEventsForDay(self, ctx):
         try:
-            calendar = self.getCalendarInfo(ctx.author.id)
+            calendar = await self.getCalendarInfo(ctx.author.id)
         except Exception:
-            ctx.send("Something is wrong with your calendar. Please set it again using setcalendar.")
+            await ctx.send("Something is wrong with your calendar. Please set it again using setcalendar.")
             return
 
         events = calendar.getEventsForDay(datetime.now(timezone.utc))
@@ -158,6 +157,29 @@ class Calendar(commands.Cog):
             return
 
         text = "Alright here are your events for today:\n\n"
+
+        for event in events:
+            timestamp: int = int(event.startTime.timestamp())
+            text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in {event.room}\n"
+
+        await ctx.send(text)
+
+    @commands.command(name="getTests", description="Set your KUSSS calendar link")
+    async def getTests(self, ctx):
+        # try:
+        calendar = await self.getCalendarInfo(ctx.author.id)
+        # except Exception:
+        # await ctx.send("Something is wrong with your calendar. Please set it again using setcalendar.")
+        # return
+
+        events = calendar.getNextTests(datetime.now(timezone.utc))
+        # events = calendar.getEventsForDay(datetime(2025, 1, 8))
+
+        if len(events) == 0:
+            await ctx.send("You have no future tests in calendar!")
+            return
+
+        text = "Alright here are future Tests:\n\n"
 
         for event in events:
             timestamp: int = int(event.startTime.timestamp())
