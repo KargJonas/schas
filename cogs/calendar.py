@@ -58,13 +58,13 @@ class Calendar(commands.Cog):
 
     async def fetch_and_validate_calendar_dm_errors(self, url: str, dm_channel) -> str | None:
         try:
-            return self.fetch_and_validate_calendar(url)
+            return await self.fetch_and_validate_calendar(url)
         except CalendarHTTPException as e:
             await dm_channel.send(f"Could not load calendar from link: Got status code {e.code}.")
         except CalendarInvalidContent:
             await dm_channel.send("Could not load calendar from link: Invalid content type.")
         except CalendarSizeException:
-            return None
+            await dm_channel.send("Your calendar file is too big.")
         except CalendarRequestFailed:
             await dm_channel.send("Could not load calendar from link: Request failed.")
         except CalendarInvalidLinkFormat:
@@ -72,61 +72,48 @@ class Calendar(commands.Cog):
 
     @commands.command(name="setcalendar", description="Set your KUSSS calendar link")
     async def setcalendar(self, ctx):
-        await ctx.send(f"I've sent you a DM {ctx.author.mention}!")
-
-        try:
-            # Create private channel for user
+        if not isinstance(ctx.channel, discord.DMChannel):
+            await ctx.send(f"I've sent you a DM {ctx.author.mention}!")
             dm_channel = await ctx.author.create_dm()
-
-            # Ask user for link
             await dm_channel.send(
                 "Please send your KUSSS calendar link.\n" +
-                f"You can find it at: {config.links.kusss_cal_page}"
+                f"You can find it at: {config.links.kusss_cal_page}\n" +
+                f"Send it using the following command: {config.prefix}setcalendar <link>"
             )
 
-            # Keep asking until we get a valid link or timeout
-            while True:
+        try:
+            content = ctx.message.content.replace(f"{config.prefix}setcalendar", "").strip()
+            calendar_data = await self.fetch_and_validate_calendar_dm_errors(content, ctx)
 
-                # Wait until user sends the link
-                msg = await self.bot.wait_for('message', timeout=config.limits.user_timeout_duration)
+            if not calendar_data:
+                ctx.send("Something went wrong. Please try again.")
+                return
+            session = self.bot.database.get_session()
+            try:
+                # Check if user already exists in DB
+                user = session.query(User).get(str(ctx.author.id))
 
-                if msg.content.lower() == 'cancel':
-                    await dm_channel.send("Calendar setup cancelled.")
-                    return
+                # Create new user or update existing user
+                if user is None:
+                    user = User(
+                        id=str(ctx.author.id),
+                        calendar_link=content,
+                        calendar_cache=calendar_data,
+                        cached_at=datetime.now(timezone.utc)
+                    )
+                    session.add(user)
+                else:
+                    user.calendar_link = content
+                    user.calendar_cache = calendar_data
+                    user.cached_at = datetime.now(timezone.utc)
+            finally:
+                session.commit()
+                session.close()
 
-                calendar_data = await self.fetch_and_validate_calendar_dm_errors(msg.content, dm_channel)
-
-                if not calendar_data:
-                    continue
-                session = self.bot.database.get_session()
-                try:
-                    # Check if user already exists in DB
-                    user = session.query(User).get(str(ctx.author.id))
-
-                    # Create new user or update existing user
-                    if user is None:
-                        user = User(
-                            id=str(ctx.author.id),
-                            calendar_link=msg.content,
-                            calendar_cache=calendar_data,
-                            cached_at=datetime.now(timezone.utc)
-                        )
-                        session.add(user)
-                    else:
-                        user.calendar_link = msg.content
-                        user.calendar_cache = calendar_data
-                        user.cached_at = datetime.now(timezone.utc)
-                finally:
-                    session.commit()
-                    session.close()
-
-                await dm_channel.send("Your calendar link has been updated!")
-                break
+            await ctx.send("Your calendar link has been updated!")
 
         except discord.Forbidden:
             await ctx.send("I couldn't send you a DM.\nPlease check your privacy settings and try again.")
-        except TimeoutError:
-            await dm_channel.send("Time's up!\nPlease try again.")
 
     def getCalendarInfo(self, authorId):
         session = self.bot.database.get_session()
