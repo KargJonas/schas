@@ -5,6 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
+import datetime
+
 config = load_json("config.json")
 
 hoursToCache = 3
@@ -72,6 +74,56 @@ class Food(commands.Cog):
 
         finally:
             driver.quit()
+
+        await ctx.send(response)
+
+    @commands.command(name="getkhgfood", description="Get this week's KHG Mensa Menus")
+    async def getkhgfood(self, ctx):
+        option = Options()
+        option.headless = True
+        option.add_experimental_option("prefs", {'safebrowsing.enabled': 'true'})
+        option.add_argument("--disable-gpu")
+        option.add_argument("--no-sandbox")
+        driver = webdriver.Chrome(option)
+
+        url = "https://www.dioezese-linz.at/khg/mensa/menueplan"
+        driver.get(url)
+
+        week_info = driver.find_element(By.CSS_SELECTOR, ".swslang strong span").text
+        kw, _ = week_info.split("KW ")[1].split(" ", maxsplit=1)
+        kw = int(kw)
+
+        start_of_week = datetime.datetime.strptime(f"2025-W{kw - 1}-1", "%Y-W%U-%w")
+        days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
+
+        table_rows = driver.find_elements(By.CSS_SELECTOR, ".sweTable1 tr")
+        current_day = None
+        veggie = False
+
+        response = ""
+
+        for row in table_rows:
+            cells = row.find_elements(By.TAG_NAME, "td")
+            if len(cells) == 1:
+                current_day = cells[0].text.strip()
+                if current_day in days:
+                    day_index = days.index(current_day)
+                    date = start_of_week + datetime.timedelta(days=day_index)
+                    response += "------------\n\n"
+                    response += f"📆 {date.strftime('%d.%m.')}\n"
+                    veggie = False
+            elif len(cells) == 3 and current_day:
+                meal = cells[0].text.strip()
+                price_regular = cells[2].text.strip()
+                if meal:
+                    if not veggie:
+                        response += f"Menü Veggie (mit Suppe und Salat)\n"
+                        veggie = True
+                    else:
+                        response += f"Menü Herzhaft (mit Suppe und Salat)\n"
+
+                    response += f"{meal}\n"
+                    response += f"€ {price_regular}\n\n"
 
         await ctx.send(response)
 
