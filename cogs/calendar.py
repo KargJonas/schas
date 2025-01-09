@@ -243,6 +243,18 @@ class Calendar(commands.Cog):
 
         await ctx.send(generate_events_text(events, "Alright here are future Tests:"))
 
+    @commands.command(name="where", description="Get navigation for a specific room")
+    async def where(self, ctx, *, room_name: str):
+
+        coordinates = find_coordinates_in_gpx(room_name)
+
+        if coordinates:
+            lat, lon = coordinates
+            link = generate_google_maps_link(lat, lon)
+            await ctx.send(f"Here's the navigation link for {room_name}: [{room_name}]({link})")
+        else:
+            await ctx.send(f"❌ Sorry room navigation failed for {room_name}\n")
+
 
 class CalendarHTTPException(Exception):
     def __init__(self, code):
