@@ -16,7 +16,7 @@ class Food(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="getmensafood", description="Get Todays Mensa Menues")
+    @commands.command(name="getmensafood", description="Get this weeks Mensa Menus")
     async def getmensafood(self, ctx):
         option = Options()
         option.headless = True
@@ -30,6 +30,8 @@ class Food(commands.Cog):
         days_list = []
 
         response = ""
+
+        await ctx.send("Hold on, this might take a second...")
 
         try:
             driver.get(url)
@@ -45,7 +47,7 @@ class Food(commands.Cog):
 
             for i in range(1, len(days_list) + 1):
                 response += "------------\n\n"
-                response += f"**{days_list[i - 1]}**\n"
+                response += f"📆**{days_list[i - 1]}**\n"
 
                 whole_selection = driver.find_element(By.XPATH,
                                                       f'/html/body/div/div[2]/main/article/div/section[2]/div/div[2]/div/div[{i}]')
@@ -65,7 +67,7 @@ class Food(commands.Cog):
                         response += f"{description}\n"
                         response += f"{price}\n"
                         response += "\n"
-                    except Exception as e:
+                    except Exception:
                         continue
 
         finally:

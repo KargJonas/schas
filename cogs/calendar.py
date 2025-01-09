@@ -10,12 +10,67 @@ from calendarHelpers.IcalStudentCalendar import IcalStudentCalendar
 from database.models import User
 from util.load_json import load_json
 
+import xml.etree.ElementTree as ET
+
 # Load config
 config = load_json("config.json")
 
 hoursToCache = 3
 hoursToCacheError = 24
 
+
+def find_coordinates_in_gpx(room_name):
+
+    file_path = "resources/JKU.gpx"
+
+    room_name = room_name.lower().replace(" ", "")
+
+    try:
+        tree = ET.parse(file_path)
+        root = tree.getroot()
+
+        namespace = {'': 'http://www.topografix.com/GPX/1/1'}
+
+        for wpt in root.findall('wpt', namespace):
+            #check if name matches
+            name_tag = wpt.find('{http://www.topografix.com/GPX/1/1}name')
+            if name_tag is not None:
+                normalized_name = name_tag.text.lower().replace(" ", "")
+
+                if room_name == normalized_name:
+                    lat = wpt.attrib.get('lat')
+                    lon = wpt.attrib.get('lon')
+                    return lat, lon
+
+        return None
+
+    except ET.ParseError as e:
+        print(f"Error parsing the GPX file: {e}")
+        return None
+    except FileNotFoundError:
+        print(f"The file '{file_path}' was not found.")
+        return None
+
+def generate_google_maps_link(lat, lon):
+    base_url = "https://www.google.com/maps/dir/?api=1"
+    destination = f"&destination={lat},{lon}"
+    return base_url + destination
+
+def generate_events_text(events, init_text):
+    text = f"{init_text}\n\n"
+
+    for event in events:
+        timestamp: int = int(event.startTime.timestamp())
+        coordinates = find_coordinates_in_gpx(event.room)
+        if coordinates:
+            lat, lon = coordinates
+            link = generate_google_maps_link(lat, lon)
+            text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in [{event.room}]({link})\n"
+        else:
+            text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in {event.room}\n"
+            text += f"❌ Sorry room navigation failed for {event.room}\n"
+
+    return text
 
 class Calendar(commands.Cog):
     def __init__(self, bot):
@@ -60,27 +115,30 @@ class Calendar(commands.Cog):
         try:
             return await self.fetch_and_validate_calendar(url)
         except CalendarHTTPException as e:
-            await dm_channel.send(f"Could not load calendar from link: Got status code {e.code}.")
+            await self.send_dm(f"Could not load calendar from link: Got status code {e.code}.", dm_channel)
         except CalendarInvalidContent:
-            await dm_channel.send("Could not load calendar from link: Invalid content type.")
+            await self.send_dm("Could not load calendar from link: Invalid content type.", dm_channel)
         except CalendarSizeException:
-            await dm_channel.send("Your calendar file is too big.")
+            await self.send_dm("Your calendar file is too big.", dm_channel)
         except CalendarRequestFailed:
-            await dm_channel.send("Could not load calendar from link: Request failed.")
+            await self.send_dm("Could not load calendar from link: Request failed.", dm_channel)
         except CalendarInvalidLinkFormat:
-            await dm_channel.send("Invalid link format.")
+            await self.send_dm("Invalid link format.", dm_channel)
 
-    @commands.command(name="setcalendar", description="Set your KUSSS calendar link")
-    async def setcalendar(self, ctx):
+    @staticmethod
+    async def send_dm(error_text: str, ctx):
         if not isinstance(ctx.channel, discord.DMChannel):
             await ctx.send(f"I've sent you a DM {ctx.author.mention}!")
             dm_channel = await ctx.author.create_dm()
             await dm_channel.send(
-                "Please send your KUSSS calendar link.\n" +
+                f"The following error occured when setting your calender: {error_text}\n" +
+                "Please send your KUSSS calendar link like described bellow!.\n" +
                 f"You can find it at: {config.links.kusss_cal_page}\n" +
                 f"Send it using the following command: {config.prefix}setcalendar <link>"
             )
 
+    @commands.command(name="setcalendar", description="Set your KUSSS calendar link")
+    async def setcalendar(self, ctx):
         try:
             content = ctx.message.content.replace(f"{config.prefix}setcalendar", "").strip()
             calendar_data = await self.fetch_and_validate_calendar_dm_errors(content, ctx)
@@ -141,30 +199,34 @@ class Calendar(commands.Cog):
             session.close()
         return IcalStudentCalendar(content)
 
-    @commands.command(name="getRoomsForToday", description="Get Rooms for today")
-    async def getEventsForDay(self, ctx):
+    @commands.command(name="calendarinfo", description="Get information about a specific day's calendar")
+    async def getEventsForDay(self, ctx, *, date_input: str = None):
         try:
             calendar = await self.getCalendarInfo(ctx.author.id)
         except Exception:
             await ctx.send("Something is wrong with your calendar. Please set it again using setcalendar.")
             return
 
-        events = calendar.getEventsForDay(datetime.now(timezone.utc))
-        # events = calendar.getEventsForDay(datetime(2025, 1, 8))
-
-        if len(events) == 0:
-            await ctx.send("You have no events today!")
+        #check if date is provided
+        try:
+            if date_input:
+                event_date = datetime.strptime(date_input, "%d.%m.%Y").replace(tzinfo=timezone.utc)
+            else:
+                event_date = datetime.now(timezone.utc)
+        except ValueError:
+            await ctx.send("Invalid date format. Please use dd.mm.yyyy.")
             return
 
-        text = "Alright here are your events for today:\n\n"
+        events = calendar.getEventsForDay(event_date)
 
-        for event in events:
-            timestamp: int = int(event.startTime.timestamp())
-            text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in {event.room}\n"
+        if len(events) == 0:
+            await ctx.send(f"You have no events on {event_date.strftime('%d.%m.%Y')}!")
+            return
 
-        await ctx.send(text)
+        await ctx.send(
+            generate_events_text(events, f"Alright, here are your events for {event_date.strftime('%d.%m.%Y')}:"))
 
-    @commands.command(name="getTests", description="Set your KUSSS calendar link")
+    @commands.command(name="testinfo", description="Get information on your upcoming tests")
     async def getTests(self, ctx):
         # try:
         calendar = await self.getCalendarInfo(ctx.author.id)
@@ -179,13 +241,7 @@ class Calendar(commands.Cog):
             await ctx.send("You have no future tests in calendar!")
             return
 
-        text = "Alright here are future Tests:\n\n"
-
-        for event in events:
-            timestamp: int = int(event.startTime.timestamp())
-            text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in {event.room}\n"
-
-        await ctx.send(text)
+        await ctx.send(generate_events_text(events, "Alright here are future Tests:"))
 
 
 class CalendarHTTPException(Exception):
