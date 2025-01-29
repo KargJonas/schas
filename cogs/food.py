@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 
 import time
 
+import cachetools.func
+
 config = load_json("config.json")
 
 hoursToCache = 3
@@ -23,9 +25,15 @@ class Food(commands.Cog):
 
     @commands.command(name="getmensafood", description="Get this weeks Mensa Menus")
     async def getmensafood(self, ctx):
-
         await ctx.send("Hold on, this might take a second...")
+        responses = self.getMensaResponseCached()
+        if len(responses) > 0:
+            for response in responses:
+                await ctx.send(response)
 
+
+    @cachetools.func.ttl_cache(maxsize=1, ttl=24 * 60 * 60)
+    def getMensaResponseCached(self):
         option = Options()
         option.headless = True
         option.add_experimental_option("prefs", {'safebrowsing.enabled': 'true'})
@@ -37,6 +45,7 @@ class Food(commands.Cog):
         url = "https://www.mensen.at/standort/mensa-jku/"
 
         days_list = []
+        responses = []
         response = ""
 
         try:
@@ -83,7 +92,7 @@ class Food(commands.Cog):
                         continue
 
                 if len(tempresponse) + len(response) >= 2000:
-                    await ctx.send(response)
+                    responses.append(response)
                     response = tempresponse
                 else:
                     response += tempresponse
@@ -91,16 +100,26 @@ class Food(commands.Cog):
         finally:
             driver.quit()
 
-        if len(response) > 0:
-            await ctx.send(response)
+        responses.append(response)
+        return responses
+
 
     @commands.command(name="getkhgfood", description="Get this week's KHG Mensa Menus")
     async def getkhgfood(self, ctx):
+        await ctx.send("Hold on, this might take a second...")
+        responses = self.getKhgResponseCached()
+        if len(responses) > 0:
+            for response in responses:
+                await ctx.send(response)
+
+    @cachetools.func.ttl_cache(maxsize=1, ttl=24 * 60 * 60)
+    def getKhgResponseCached(self):
         option = Options()
         option.headless = True
         option.add_experimental_option("prefs", {'safebrowsing.enabled': 'true'})
         option.add_argument("--disable-gpu")
         option.add_argument("--no-sandbox")
+        option.add_argument("--headless")
         driver = webdriver.Chrome(option)
 
         try:
@@ -121,6 +140,7 @@ class Food(commands.Cog):
             table_rows = driver.find_elements(By.CSS_SELECTOR, ".sweTable1 tr")
 
             current_day = None
+            responses = []
             response = ""
             vegi = True
 
@@ -154,29 +174,35 @@ class Food(commands.Cog):
                         tempresponse += f"{price}\n\n"
 
                 if len(tempresponse) + len(response) >= 2000:
-                    await ctx.send(response)
+                    responses.append(response)
                     response = tempresponse
                 else:
                     response += tempresponse
-
-            if len(response) > 0:
-                await ctx.send(response)
+            responses.append(response)
+            if len(responses) > 0:
+                return responses
 
         finally:
             driver.quit()
+        return []
 
     @commands.command(name="getraabfood", description="Get this week's Raab Mensa Menus")
     async def getraabfood(self, ctx):
-
         await ctx.send("Hold on, this might take a second...")
+        responses = self.getRaabResponseCached()
+        if len(responses) > 0:
+            for response in responses:
+                await ctx.send(response)
 
+    @cachetools.func.ttl_cache(maxsize=1, ttl=24 * 60 * 60)
+    def getRaabResponseCached(self):
         option = Options()
         option.headless = True
         option.add_experimental_option("prefs", {'safebrowsing.enabled': 'true'})
         option.add_argument("--disable-gpu")
         option.add_argument("--no-sandbox")
+        option.add_argument("--headless")
         driver = webdriver.Chrome(option)
-
         url = "https://www.mittag.at/w/raabmensa"
         driver.get(url)
 
@@ -188,6 +214,7 @@ class Food(commands.Cog):
         days = dl_element.find_elements(By.TAG_NAME, 'dt')
         menus = dl_element.find_elements(By.TAG_NAME, 'dd')
 
+        responses = []
         response = ""
         for i, (day, menu) in enumerate(zip(days, menus)):
             if i > 0:
@@ -214,17 +241,17 @@ class Food(commands.Cog):
                 tempresponse += "No information for this day!\n\n"
 
             if len(tempresponse) + len(response) >= 2000:
-                await ctx.send(response)
+                responses.append(response)
                 response = tempresponse
             else:
                 response += tempresponse
 
         response += "------------"
 
-        if len(response) > 0:
-            await ctx.send(response)
+        responses.append(response)
 
         driver.quit()
+        return responses
 
 async def setup(bot):
     await bot.add_cog(Food(bot))
