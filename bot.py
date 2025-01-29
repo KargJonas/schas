@@ -31,6 +31,7 @@ class DiscordBot(commands.Bot):
             command_prefix=commands.when_mentioned_or(config.prefix),
             intents=intents,
             help_command=None,
+            case_insensitive=True
         )
         self.logger = logger
         self.config = config

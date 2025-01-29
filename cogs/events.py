@@ -18,6 +18,7 @@ class Events(commands.Cog):
         option.add_experimental_option("prefs", {'safebrowsing.enabled': 'true'})
         option.add_argument("--disable-gpu")
         option.add_argument("--no-sandbox")
+        option.add_argument("--headless")
         driver = webdriver.Chrome(option)
 
         url = "https://www.jku.at/news-events/events/"

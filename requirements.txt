@@ -4,4 +4,7 @@ discord.py
 python-dotenv
 SQLAlchemy
 requests
+audioop-lts
+icalendar
 selenium
+cachetools
