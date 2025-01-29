@@ -115,7 +115,7 @@ python3 -m pip install -r requirements.txt
 python3 bot.py
 ```
 
-In the log, you should be able to find a `Bot invite link` that you can click to add the bot to your server.
+In the log, you should be able to find a `Bot invite link` that you can click *to add the bot to your server*.
 
 ```
 $ python3 bot.py 
@@ -128,3 +128,5 @@ Running on: Linux 6.8.0-49-generic (posix)
 Bot invite link: https://discord.com/oauth2/authorize?client_id=1324822783283608180&scope=bot+applications.commands&permissions=3072
 -------------------
 ```
+
+If you need a server to test the bot on, feel free to join our [Schas Test Server](https://discord.gg/esjqgDc6Bs) (A.k.a STS).
