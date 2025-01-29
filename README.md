@@ -132,4 +132,4 @@ Bot invite link: https://discord.com/oauth2/authorize?client_id=1324822783283608
 ### Schas Test Server (STS)
 
 If you need a server to test the bot on, feel free to join our [Schas Test Server](https://discord.gg/esjqgDc6Bs) (A.k.a STS).
-If you don't want to set up the bot, you can still have a look at the server, to check out our interactions with it on the Schas Test Server.
+If you don't want to set up the bot, you can still have a look at the server, to check out our interactions with it.
