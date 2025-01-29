@@ -2,15 +2,14 @@ import logging
 import os
 import platform
 import random
-
 from pathlib import Path
+
+import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-import discord
 
 from database.database import DatabaseManager
 from util.load_json import load_json
-
 
 # Load config
 config = load_json("config.json")

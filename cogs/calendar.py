@@ -1,5 +1,6 @@
 # cogs/calendar.py
 import re
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 
 import discord
@@ -9,8 +10,6 @@ from discord.ext import commands
 from calendarHelpers.IcalStudentCalendar import IcalStudentCalendar
 from database.models import User
 from util.load_json import load_json
-
-import xml.etree.ElementTree as ET
 
 # Load config
 config = load_json("config.json")

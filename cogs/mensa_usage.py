@@ -1,6 +1,6 @@
-from discord.ext import commands
 import datetime
 
+from discord.ext import commands
 
 hours = [11, 12, 13, 14]
 closing_times = [14.5, 14.5, 14.5, 14.5, 13.5, 0, 0]

@@ -1,16 +1,14 @@
-from discord.ext import commands
-from util.load_json import load_json
+import datetime
+import time
+from datetime import datetime, timedelta
 
+import cachetools.func
+from discord.ext import commands
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
-import datetime
-from datetime import datetime, timedelta
-
-import time
-
-import cachetools.func
+from util.load_json import load_json
 
 config = load_json("config.json")
 

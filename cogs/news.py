@@ -1,5 +1,4 @@
 from discord.ext import commands
-from util.load_json import load_json
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options

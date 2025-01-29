@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from database.models import Base
+
 
 class DatabaseManager:
     def __init__(self, db_url="sqlite:///database.db"):

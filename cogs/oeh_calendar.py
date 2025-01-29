@@ -1,26 +1,8 @@
-import re
-from datetime import datetime, timezone, timedelta
-from typing import Any, Coroutine
-
-import discord
-import requests
+import cachetools.func
 from discord.ext import commands
-
-from calendarHelpers.IcalStudentCalendar import IcalStudentCalendar
-from cogs.calendar import CalendarInvalidLinkFormat, CalendarHTTPException, CalendarSizeException, \
-    CalendarInvalidContent, CalendarRequestFailed
-from database.models import User
-from util.load_json import load_json
-
-from discord.ext import commands
-from util.load_json import load_json
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-import cachetools.func
-
-import xml.etree.ElementTree as ET
 
 
 class GetOehEvents(commands.Cog):
