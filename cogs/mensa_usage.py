@@ -38,13 +38,16 @@ class Mensa(commands.Cog):
 
     def get_occupancy_percentage(self, day_idx, time_float=None):
         if time_float is None:
-            hour_idx = int(time_float) - 11
-            return int(occupancy_data[hour_idx][day_idx] * 100)
-        else:
-            occupancy = self.interpolate_occupancy(day_idx, time_float)
-            return int(occupancy * 100) if occupancy is not None else None
+            # Get current time if no time provided
+            current_time = datetime.datetime.now()
+            time_float = current_time.hour + current_time.minute/60.0
+            
+        occupancy = self.interpolate_occupancy(day_idx, time_float)
+        return int(occupancy * 100) if occupancy is not None else None
 
     def get_status_emoji(self, percentage):
+        if percentage is None:
+            return "❌"  # or some other appropriate indicator
         if percentage >= 80:
             return "🔴"
         elif percentage >= 50:
@@ -61,10 +64,10 @@ class Mensa(commands.Cog):
             return "Closed on weekends"
 
     @commands.command(
-        name="mensa_usage",
-        description="Get JKU Mensa occupancy. Use '!mensa_usage' for current time or '!mensa_usage Monday' for a specific day"
+        name="mensa_status",
+        description="Get JKU Mensa occupancy. Use '!mensa_status' for current time or '!mensa_status Monday' for a specific day"
     )
-    async def mensa_usage(self, ctx, day: str = None):
+    async def mensa_status(self, ctx, day: str = None):
         current_time = datetime.datetime.now()
         
         if day:
