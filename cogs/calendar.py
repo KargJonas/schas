@@ -64,7 +64,7 @@ def generate_events_text(events, init_text):
         if coordinates:
             lat, lon = coordinates
             link = generate_google_maps_link(lat, lon)
-            text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in [{event.room}]({link})\n"
+            text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in [{event.room}](<{link}>)\n"
         else:
             text += f"{event.title} with {event.lecturer} at <t:{timestamp}:t> in {event.room}\n"
             text += f"❌ Sorry room navigation failed for {event.room}\n"
