@@ -102,6 +102,11 @@ class DiscordBot(commands.Bot):
                 color=0xE02B2B,
             )
             await context.send(embed=embed)
+        elif isinstance(error, commands.CommandNotFound):
+            #display help command if command not found
+            help_cmd = self.get_command("help")
+            if help_cmd:
+                await context.invoke(help_cmd)
         else:
             raise error
 
