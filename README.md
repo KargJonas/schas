@@ -97,8 +97,20 @@ Anyone with this key could use your API access, which is why we don't want it di
 
 The `.env` is excluded by the `.gitignore` rules, which makes it a lot more difficult to accidentally commit your API access token,
 
-### How to start the bot
+### How to run the bot
 
+#### Create and activate a virtual environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+#### Install dependencies
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+#### Run the bot
 ```bash
 python3 bot.py
 ```
