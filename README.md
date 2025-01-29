@@ -1,8 +1,62 @@
 # S.C.H.A.S. - Supreme Channel Help Assistent Service
 
-#### The number 1. JKU Discord support bot.
+This JKU Discord Bot is designed to help students and faculty stay updated with their schedules, on-campus meal options, occupancy levels at the JKU Mensa, and the latest news and events from JKU. It also provides helpful navigation for campus rooms. Below is an overview of the bot’s capabilities and how to get started.
 
-## Getting started
+## Features
+### Calendar Integration
+- Set and validate your KUSSS calendar link, then retrieve daily schedules or upcoming tests.
+- Navigation links for campus rooms, utilizing Google Maps to provide directions.
+
+### Food / Mensa Menus
+- Retrieve the latest menus from the JKU Mensa and Raab Mensa.
+- Seamlessly display vegetarian and non-vegetarian options, along with approximate prices.
+
+### Mensa Occupancy
+- Estimate current and future occupancy levels at the JKU Mensa, allowing you to plan your meals around busy times.
+
+### News and Events
+- Fetch the most recent news from the official JKU news page.
+- Retrieve upcoming events from the JKU events page.
+- Optional parameter to specify how many news or event items to display.
+
+### Custom Help Command
+- A personalized help command (“!help” or “!h”) that lists all available commands and provides basic usage instructions.
+- Automatically triggered if a user enters an unknown command.
+
+## Command Overview
+Below are some of the main commands (you can see them all via “!help” or “!h” in Discord) (brackets [] are optional parameters and angle brackets <> are required parameters):
+
+- `!setcalendar [link]`
+Sets your personal KUSSS calendar link, validates it, and stores it for further use.
+
+- `!testinfo`
+Lists your upcoming tests based on the KUSSS calendar data.
+
+- `!calendarinfo [dd.mm.yyyy]`
+Fetches your schedule for a specific date.
+
+- `!where <room>`
+Provides a Google Maps navigation link for a room on campus.
+
+- `!getmensafood`
+Shows the weekly menu from the JKU Mensa.
+
+- `!getraabfood`
+Shows the weekly menu from the Raab Mensa.
+
+- `!mensastatus`
+Displays real-time occupancy info and forecasts for the JKU Mensa.
+
+- `!getnews [number]`
+Fetches recent news items from the JKU news page (3 items by default, max 9).
+- 
+- `!getevents [number]`
+Fetches upcoming events from the JKU events page (3 items by default, max 9).
+
+- `!help or !h`
+Shows your custom help command with detailed usage instructions.
+
+## How to run the bot locally
 
 ### Set up Discord API access
 
@@ -50,12 +104,3 @@ Running on: Linux 6.8.0-49-generic (posix)
 Bot invite link: https://discord.com/oauth2/authorize?client_id=1324822783283608180&scope=bot+applications.commands&permissions=3072
 -------------------
 ```
-
-### Add new functionality
-
-New features should be added as "cogs" inside the `/cogs` directory.
-You can do this by simply creating a new file inside of that dir.
-You can also have a look at `/cogs/calendar` as a reference.
-Cogs are similar to plugins. All files inside `/cogs` will be loaded automatically, so you don't need to register your cog anywhere.
-
-Have a look at `/database/models.py`. This file contains the DB schema.
