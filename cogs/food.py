@@ -51,13 +51,13 @@ class Food(commands.Cog):
                     days_list.append(day_text)
 
             for i in range(1, len(days_list) + 1):
-                response += "------------\n\n"
+                tempresponse = "------------\n\n"
                 if len(days_list) > 1:
-                    response += f"📆**{days_list[i - 1]}**\n\n"
+                    tempresponse += f"📆**{days_list[i - 1]}**\n\n"
                 else:
                     today = datetime.today()
                     formatted_date = today.strftime("%d.%m")
-                    response += f"📆**{formatted_date}**\n\n"
+                    tempresponse += f"📆**{formatted_date}**\n\n"
 
                 whole_selection = driver.find_element(By.XPATH,
                                                       f'/html/body/div/div[2]/main/article/div/section[2]/div/div[2]/div/div[{i}]')
@@ -72,18 +72,26 @@ class Food(commands.Cog):
                         price = element.find_element(By.XPATH,
                                                      './/div[@class="flex flex-col items-end justify-between flex-shrink-0 gap-1"]/span[@class="font-bold"]').text
 
-                        response += f"**{menu_name}**\n"
-                        response += f"{food_name}\n"
-                        response += f"{description}\n"
-                        response += f"{price}\n"
-                        response += "\n"
+                        tempresponse += f"**{menu_name}**\n"
+                        tempresponse += f"{food_name}\n"
+                        tempresponse += f"{description}\n"
+                        tempresponse += f"{price}\n"
+                        tempresponse += "\n"
+
                     except Exception:
                         continue
+
+                if len(tempresponse) + len(response) >= 2000:
+                    await ctx.send(response)
+                    response = tempresponse
+                else:
+                    response += tempresponse
 
         finally:
             driver.quit()
 
-        await ctx.send(response)
+        if len(response) > 0:
+            await ctx.send(response)
 
     @commands.command(name="getkhgfood", description="Get this week's KHG Mensa Menus")
     async def getkhgfood(self, ctx):
@@ -117,6 +125,7 @@ class Food(commands.Cog):
 
             for row in table_rows:
                 cells = row.find_elements(By.TAG_NAME, "td")
+                tempresponse = ""
 
                 if len(cells) == 1:
                     day_text = cells[0].text.strip()
@@ -124,8 +133,8 @@ class Food(commands.Cog):
                         current_day = day_text
                         day_index = day_index_map[current_day]
                         day_date = start_of_week + timedelta(days=day_index)
-                        response += "------------\n\n"
-                        response += f"**📆 {current_day}, {day_date.strftime('%d.%m.')}**\n\n"
+                        tempresponse = "------------\n\n"
+                        tempresponse += f"**📆 {current_day}, {day_date.strftime('%d.%m.')}**\n\n"
 
                 elif len(cells) == 3 and current_day:
                     dish = cells[0].text.strip()
@@ -133,17 +142,24 @@ class Food(commands.Cog):
                         price = "€ 5,20"
 
                         if vegi:
-                            response += "**Menü Veggie**\n"
+                            tempresponse += "**Menü Veggie**\n"
                             vegi = False
                         else:
-                            response += "**Menü Herzhaft**\n"
+                            tempresponse += "**Menü Herzhaft**\n"
                             price = "€ 6,30"
                             vegi = True
 
-                        response += f"{dish}\n"
-                        response += f"{price}\n\n"
+                        tempresponse += f"{dish}\n"
+                        tempresponse += f"{price}\n\n"
 
-            await ctx.send(response)
+                if len(tempresponse) + len(response) >= 2000:
+                    await ctx.send(response)
+                    response = tempresponse
+                else:
+                    response += tempresponse
+
+            if len(response) > 0:
+                await ctx.send(response)
 
         finally:
             driver.quit()
@@ -182,7 +198,7 @@ class Food(commands.Cog):
             menu_text = menu.get_attribute('innerHTML').replace('<br>', '\n').strip()
             menu_lines = [line.strip() for line in menu_text.split('\n') if line.strip()]
 
-            response += f"------------\n\n\📆 **{date}**\n\n"
+            tempresponse = f"------------\n\n\📆 **{date}**\n\n"
 
             if "MENÜ 1" in menu_lines and "MENÜ 2" in menu_lines:
                 menu1_start = menu_lines.index("MENÜ 1") + 1
@@ -191,14 +207,21 @@ class Food(commands.Cog):
                 menu1_lines = menu_lines[menu1_start:menu2_start - 1]
                 menu2_lines = menu_lines[menu2_start:]
 
-                response += f"**Menü Herzhaft**\n{' '.join(menu1_lines)}\n\n"
-                response += f"**Menü Veggie**\n{' '.join(menu2_lines)}\n\n"
+                tempresponse += f"**Menü Herzhaft**\n{' '.join(menu1_lines)}\n\n"
+                tempresponse += f"**Menü Veggie**\n{' '.join(menu2_lines)}\n\n"
             else:
-                response += "No information for this day!\n\n"
+                tempresponse += "No information for this day!\n\n"
+
+            if len(tempresponse) + len(response) >= 2000:
+                await ctx.send(response)
+                response = tempresponse
+            else:
+                response += tempresponse
 
         response += "------------"
 
-        await ctx.send(response)
+        if len(response) > 0:
+            await ctx.send(response)
 
         driver.quit()
 
