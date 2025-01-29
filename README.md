@@ -37,38 +37,15 @@ To use the bot in full capacity you must set up your calendar  with `!setcalenda
 ## Command Overview
 Below are some of the main commands (you can see them all via “!help” or “!h” in Discord) (brackets [] are optional parameters and angle brackets <> are required parameters):
 
-- `!setCalendar [link]`
-Sets your personal KUSSS calendar link, validates it, and stores it for further use.
+![!help](help.png)
 
-- `!testInfo`
-Lists your upcoming tests based on the KUSSS calendar data.
+## Some screenshots
 
-- `!calendarInfo [dd.mm.yyyy]`
-Fetches your schedule for a specific date.
+![!calendarinfo](calendarinfo.png)
 
-- `!where <room>`
-Provides a Google Maps navigation link for a room on campus.
+![mensaStatus](mensastatus.png)
 
-- `!getMensaFood`
-Shows the weekly menu from the JKU Mensa.
-
-- `!getRaabFood`
-Shows the weekly menu from the Raab Mensa.
-
-- `!mensaStatus [weekday]`
-Displays real-time occupancy info and forecasts for the JKU Mensa (weekday = Monday, Tuesday, ...).
-
-- `!getNews [number]`
-Fetches recent news items from the JKU news page (3 items by default, max 9).
-
-- `!getEvents [number]`
-Fetches upcoming events from the JKU events page (3 items by default, max 9).
-
-- `!getOehEvents`
-Fetches upcoming ÖH events.
-
-- `!help or !h`
-Shows your custom help command with detailed usage instructions.
+![getkhgfood](getkhgfood.png)
 
 ## How to run the bot locally
 
