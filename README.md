@@ -3,6 +3,8 @@
 This JKU Discord Bot is designed to help students and faculty stay updated with their schedules, on-campus meal options, occupancy levels at the JKU Mensa, and the latest news and events from JKU. 
 It also provides helpful navigation for campus rooms. Below is an overview of the bot’s capabilities and how to get started.
 
+To use the bot in full capacity you must set up your calendar  with `!setcalendar`
+
 ## Team
 - Lorenz Bader k12212953
 - Philip Buchegger k12204693
@@ -128,7 +130,7 @@ Running on: Linux 6.8.0-49-generic (posix)
 Bot invite link: https://discord.com/oauth2/authorize?client_id=1324822783283608180&scope=bot+applications.commands&permissions=3072
 -------------------
 ```
-
+To use the bot in full capacity you must set up your calendar  with `!setcalendar`
 ### Schas Test Server (STS)
 
 If you need a server to test the bot on, feel free to join our [Schas Test Server](https://discord.gg/esjqgDc6Bs) (A.k.a STS).

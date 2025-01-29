@@ -14,6 +14,8 @@ class Help(commands.Cog):
             color=discord.Color.blue()
         )
 
+        embed.add_field(name="Calendar Info", value="To use the bot in full capacity you must set up your calendar  with `!setcalendar`", inline=False)
+
         calendar_commands = """
         `!setCalendar <link>` - Set your KUSSS calendar link
         `!calendarInfo [dd.mm.yyyy]` - Get your schedule for a specific day
