@@ -15,30 +15,35 @@ class Help(commands.Cog):
         )
 
         calendar_commands = """
-        `!setcalendar <link>` - Set your KUSSS calendar link
-        `!calendarinfo [dd.mm.yyyy]` - Get your schedule for a specific day
-        `!testinfo` - Get information about your upcoming tests
+        `!setCalendar <link>` - Set your KUSSS calendar link
+        `!calendarInfo [dd.mm.yyyy]` - Get your schedule for a specific day
+        `!testInfo` - Get information about your upcoming tests
         `!where <room>` - Get navigation link to a specific room
         """
         embed.add_field(name="📅 Calendar Commands", value=calendar_commands, inline=False)
 
         food_commands = """
-        `!getmensafood` - Get JKU Mensa menus for the week
-        `!getkhgfood` - Get KHG Mensa menus for the week
-        `!getraabfood` - Get Raab Mensa menus for the week
+        `!getMensaFood` - Get JKU Mensa menus for the week
+        `!getKhgFood` - Get KHG Mensa menus for the week
+        `!getRaabFood` - Get Raab Mensa menus for the week
         """
         embed.add_field(name="🍽️ Food Commands", value=food_commands, inline=False)
 
         mensa_status_commands = """
-                `!mensa_status [weekday]` - Get JKU Mensa occupancy. weekday = Monday, Tuesday, ...
+                `!mensaStatus [weekday]` - Get JKU Mensa occupancy. weekday = Monday, Tuesday, ...
                 """
         embed.add_field(name="🍽️ Mensa Status Commands", value=mensa_status_commands, inline=False)
 
         news_commands = """
-        `!getnews [number]` - Get recent JKU news (default: 3, max: 9)
-        `!getevents [number]` - Get upcoming JKU events (default: 3, max: 9)
+        `!getNews [number]` - Get recent JKU news (default: 3, max: 9)
+        `!getEvents [number]` - Get upcoming JKU events (default: 3, max: 9)
         """
         embed.add_field(name="📰 News & Events", value=news_commands, inline=False)
+
+        event_commands = """
+                `!getOehEvents` - Get next ÖH events
+                """
+        embed.add_field(name="📰 ÖH Events", value=event_commands, inline=False)
 
         help_command = """
         `!help` or `!h` - Display this help message

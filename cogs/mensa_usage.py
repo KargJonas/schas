@@ -64,7 +64,7 @@ class Mensa(commands.Cog):
             return "Closed on weekends"
 
     @commands.command(
-        name="mensa_status",
+        name="mensaStatus",
         description="Get JKU Mensa occupancy. Use '!mensa_status' for current time or '!mensa_status Monday' for a specific day"
     )
     async def mensa_status(self, ctx, day: str = None):
